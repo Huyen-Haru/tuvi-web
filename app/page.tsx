@@ -1,65 +1,93 @@
-import Image from "next/image";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import BirthForm from '@/components/BirthForm';
+import type { BirthInput } from '@/lib/ziwei/types';
 
 export default function Home() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (input: BirthInput) => {
+    setLoading(true);
+    const params = new URLSearchParams({
+      name:   input.name,
+      day:    String(input.day),
+      month:  String(input.month),
+      year:   String(input.year),
+      hour:   String(input.hour),
+      gender: input.gender,
+    });
+    router.push(`/chart?${params.toString()}`);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px 16px',
+      background: 'var(--bg)',
+    }}>
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 480 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{
+            fontSize: 38,
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #d4a843 0%, #f0c96e 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginBottom: 10,
+            letterSpacing: '-0.02em',
+          }}>
+            紫微 · Tử Vi AI
+          </div>
+          <p style={{ fontSize: 14, color: 'var(--text2)', lineHeight: 1.7 }}>
+            Luận giải lá số Tử Vi Đẩu Số theo hệ thống<br />
+            <span style={{ color: 'var(--gold)', fontWeight: 500 }}>Nghê Hải Hà (倪海夏)</span>
           </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+            {['12 Cung', 'Tứ Hóa', 'Đại Hạn', 'Lưu Niên', 'AI Luận Giải'].map(tag => (
+              <span key={tag} style={{
+                fontSize: 10,
+                color: 'var(--faint)',
+                background: 'rgba(212,168,67,0.05)',
+                border: '1px solid rgba(212,168,67,0.15)',
+                borderRadius: 20,
+                padding: '3px 10px',
+              }}>
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Form card */}
+        <div className="card-glass" style={{ padding: 28 }}>
+          <h2 style={{
+            fontSize: 11,
+            color: 'var(--gold)',
+            marginBottom: 22,
+            letterSpacing: '0.1em',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+          }}>
+            ✦ Nhập thông tin sinh
+          </h2>
+          <BirthForm onSubmit={handleSubmit} loading={loading} />
         </div>
-      </main>
-    </div>
+
+        {/* Disclaimer */}
+        <p style={{ textAlign: 'center', fontSize: 10, color: 'var(--faint)', marginTop: 20, lineHeight: 1.7 }}>
+          Phân tích bởi Claude AI · Tử Vi Đẩu Số là công cụ tham khảo<br />
+          Theo Nghê Sư: &quot;Nhân lực lớn hơn Thiên mệnh&quot;
+        </p>
+      </div>
+    </main>
   );
 }
