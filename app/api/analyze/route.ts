@@ -1,9 +1,9 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextRequest, NextResponse } from 'next/server';
 import type { ZiweiChart } from '@/lib/ziwei/types';
 import { buildSystemPrompt } from '@/lib/ziwei/prompts';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,25 +17,30 @@ export async function POST(req: NextRequest) {
     }
 
     const systemPrompt = buildSystemPrompt(chart);
-
-    const stream = client.messages.stream({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
-      system: systemPrompt,
-      messages,
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      systemInstruction: systemPrompt,
     });
+
+    // Convert message history for Gemini (role: user/model, not user/assistant)
+    const history = messages.slice(0, -1).map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
+
+    const lastMsg = messages[messages.length - 1];
+    const chat = model.startChat({ history });
+    const result = await chat.sendMessageStream(lastMsg.content);
 
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of stream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            if (text) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
               );
             }
           }
