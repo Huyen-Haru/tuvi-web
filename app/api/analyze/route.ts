@@ -22,7 +22,6 @@ export async function POST(req: NextRequest) {
       systemInstruction: systemPrompt,
     });
 
-    // Convert message history for Gemini (role: user/model, not user/assistant)
     const history = messages.slice(0, -1).map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }],
