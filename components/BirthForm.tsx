@@ -59,11 +59,27 @@ export default function BirthForm({ onSubmit, loading }: Props) {
     e.preventDefault();
     setError('');
 
-    const d = parseInt(day), m = parseInt(month), y = parseInt(year);
     if (!name.trim()) return setError('Vui lòng nhập họ tên.');
-    if (!d || d < 1 || d > 31) return setError('Ngày không hợp lệ (1–31).');
-    if (!m || m < 1 || m > 12) return setError('Tháng không hợp lệ (1–12).');
-    if (!y || y < 1900 || y > 2010) return setError('Năm không hợp lệ (1900–2010).');
+
+    const ld = lunarDay ? parseInt(lunarDay) : undefined;
+    const lm = lunarMonth ? parseInt(lunarMonth) : undefined;
+    const ly = lunarYear ? parseInt(lunarYear) : undefined;
+    const hasFullLunar = showLunar && ld && lm && ly;
+
+    // Validate âm lịch nếu đã nhập
+    if (showLunar && (ld || lm || ly)) {
+      if (!ld || ld < 1 || ld > 30) return setError('Ngày âm lịch không hợp lệ (1–30).');
+      if (!lm || lm < 1 || lm > 12) return setError('Tháng âm lịch không hợp lệ (1–12).');
+      if (!ly || ly < 1900 || ly > 2010) return setError('Năm âm lịch không hợp lệ.');
+    }
+
+    // Dương lịch bắt buộc khi không có âm lịch đầy đủ
+    const d = parseInt(day), m = parseInt(month), y = parseInt(year);
+    if (!hasFullLunar) {
+      if (!d || d < 1 || d > 31) return setError('Ngày dương lịch không hợp lệ (1–31).');
+      if (!m || m < 1 || m > 12) return setError('Tháng dương lịch không hợp lệ (1–12).');
+      if (!y || y < 1900 || y > 2010) return setError('Năm dương lịch không hợp lệ (1900–2010).');
+    }
 
     let finalHour = hourBranch;
     if (hourMode === 'clock') {
@@ -72,19 +88,11 @@ export default function BirthForm({ onSubmit, loading }: Props) {
       finalHour = clockToHourBranch(h, min);
     }
 
-    const ld = lunarDay ? parseInt(lunarDay) : undefined;
-    const lm = lunarMonth ? parseInt(lunarMonth) : undefined;
-    const ly = lunarYear ? parseInt(lunarYear) : undefined;
-
-    if (showLunar && (ld || lm || ly)) {
-      if (!ld || ld < 1 || ld > 30) return setError('Ngày âm lịch không hợp lệ (1–30).');
-      if (!lm || lm < 1 || lm > 12) return setError('Tháng âm lịch không hợp lệ (1–12).');
-      if (!ly) return setError('Vui lòng nhập năm âm lịch.');
-    }
-
     onSubmit({
-      name: name.trim(), day: d, month: m, year: y, hour: finalHour, gender,
-      ...(showLunar && ld && lm && ly ? { lunarDay: ld, lunarMonth: lm, lunarYear: ly } : {}),
+      name: name.trim(),
+      day: d || 1, month: m || 1, year: y || (ly ?? 1990),
+      hour: finalHour, gender,
+      ...(hasFullLunar ? { lunarDay: ld, lunarMonth: lm, lunarYear: ly } : {}),
     });
   };
 
@@ -128,7 +136,14 @@ export default function BirthForm({ onSubmit, loading }: Props) {
 
       {/* Ngày tháng năm */}
       <div>
-        <label style={labelStyle}>Ngày / Tháng / Năm sinh (Dương lịch)</label>
+        <label style={labelStyle}>
+          Ngày / Tháng / Năm sinh (Dương lịch)
+          {showLunar && lunarDay && lunarMonth && lunarYear && (
+            <span style={{ color: 'var(--faint)', fontWeight: 400, marginLeft: 6, fontSize: 10 }}>
+              — tùy chọn khi đã có âm lịch
+            </span>
+          )}
+        </label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 8 }}>
           <input type="number" placeholder="Ngày" min={1} max={31} value={day}
             onChange={e => setDay(e.target.value)} style={inputStyle}
