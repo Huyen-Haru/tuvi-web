@@ -5,6 +5,11 @@ export interface BirthInput {
   day: number;
   hour: number;   // 0-11 địa chi giờ (0=Tý, 1=Sửu, ... 11=Hợi)
   gender: 'male' | 'female';
+  // Ngày âm lịch ghi đè (dùng lịch Việt thay vì lịch Trung)
+  lunarYear?: number;
+  lunarMonth?: number;
+  lunarDay?: number;
+  isLeapMonth?: boolean;
 }
 
 export type SiHua = 'loc' | 'quyen' | 'khoa' | 'ky';

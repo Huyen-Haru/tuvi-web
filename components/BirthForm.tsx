@@ -49,6 +49,10 @@ export default function BirthForm({ onSubmit, loading }: Props) {
   const [hourMode, setHourMode] = useState<'clock' | 'branch'>('clock');
   const [hourBranch, setHourBranch] = useState(4); // Thìn mặc định
   const [gender, setGender] = useState<'female' | 'male'>('female');
+  const [showLunar, setShowLunar] = useState(false);
+  const [lunarDay, setLunarDay] = useState('');
+  const [lunarMonth, setLunarMonth] = useState('');
+  const [lunarYear, setLunarYear] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,7 +72,20 @@ export default function BirthForm({ onSubmit, loading }: Props) {
       finalHour = clockToHourBranch(h, min);
     }
 
-    onSubmit({ name: name.trim(), day: d, month: m, year: y, hour: finalHour, gender });
+    const ld = lunarDay ? parseInt(lunarDay) : undefined;
+    const lm = lunarMonth ? parseInt(lunarMonth) : undefined;
+    const ly = lunarYear ? parseInt(lunarYear) : undefined;
+
+    if (showLunar && (ld || lm || ly)) {
+      if (!ld || ld < 1 || ld > 30) return setError('Ngày âm lịch không hợp lệ (1–30).');
+      if (!lm || lm < 1 || lm > 12) return setError('Tháng âm lịch không hợp lệ (1–12).');
+      if (!ly) return setError('Vui lòng nhập năm âm lịch.');
+    }
+
+    onSubmit({
+      name: name.trim(), day: d, month: m, year: y, hour: finalHour, gender,
+      ...(showLunar && ld && lm && ly ? { lunarDay: ld, lunarMonth: lm, lunarYear: ly } : {}),
+    });
   };
 
   const inputStyle: React.CSSProperties = {
@@ -208,6 +225,46 @@ export default function BirthForm({ onSubmit, loading }: Props) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Ngày âm lịch (tùy chọn - để tránh lệch lịch Việt/Trung) */}
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowLunar(v => !v)}
+          style={{
+            background: 'transparent', border: 'none', color: 'var(--faint)',
+            fontSize: 11, cursor: 'pointer', padding: 0, textDecoration: 'underline',
+          }}
+        >
+          {showLunar ? '▲ Ẩn' : '▼ Nhập ngày âm lịch'} (nếu biết — tránh lệch lịch Việt/Trung)
+        </button>
+
+        {showLunar && (
+          <div style={{ marginTop: 10 }}>
+            <p style={{ fontSize: 10, color: 'var(--faint)', marginBottom: 8 }}>
+              Lịch âm Việt Nam và Trung Quốc có thể lệch 1 ngày với một số ngày gần đầu tháng âm lịch.
+              Nhập đúng ngày âm lịch Việt Nam để tính chính xác hơn.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 8 }}>
+              <input type="number" placeholder="Ngày âm" min={1} max={30} value={lunarDay}
+                onChange={e => setLunarDay(e.target.value)} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--border2)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+              <input type="number" placeholder="Tháng âm" min={1} max={12} value={lunarMonth}
+                onChange={e => setLunarMonth(e.target.value)} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--border2)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+              <input type="number" placeholder="Năm âm (vd: 1996)" min={1900} max={2010} value={lunarYear}
+                onChange={e => setLunarYear(e.target.value)} style={inputStyle}
+                onFocus={e => e.target.style.borderColor = 'var(--border2)'}
+                onBlur={e => e.target.style.borderColor = 'var(--border)'}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (

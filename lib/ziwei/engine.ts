@@ -64,10 +64,17 @@ export function getLunarInfo(year: number, month: number, day: number): LunarInf
 
 export function generateChart(input: BirthInput): ZiweiChart {
   const { year, month, day, hour, gender } = input;
-  const solarDate = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   const iztroGender = gender === 'male' ? '男' : '女';
 
-  const astrolabe = astro.bySolar(solarDate, hour, iztroGender, true, 'zh-CN');
+  // Nếu có ngày âm lịch Việt ghi đè, dùng byLunar() để tránh sai lệch lịch Việt/Trung
+  let astrolabe;
+  if (input.lunarYear && input.lunarMonth && input.lunarDay) {
+    const lunarDateStr = `${input.lunarYear}-${input.lunarMonth}-${input.lunarDay}`;
+    astrolabe = astro.byLunar(lunarDateStr, hour, iztroGender, input.isLeapMonth ?? false, true, 'zh-CN');
+  } else {
+    const solarDate = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    astrolabe = astro.bySolar(solarDate, hour, iztroGender, true, 'zh-CN');
+  }
   const currentYear = new Date().getFullYear();
   const currentAge = currentYear - year;
 
