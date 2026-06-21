@@ -3,19 +3,21 @@ export const BRANCH_VI = ['Tý','Sửu','Dần','Mão','Thìn','Tỵ','Ngọ','M
 export const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 export const STEM_VI = ['Giáp','Ất','Bính','Đinh','Mậu','Kỷ','Canh','Tân','Nhâm','Quý'];
 
+// Keys khớp với p.name từ iztro (không có hậu tố 宫, trừ 命宫)
 export const PALACE_NAME_VI: Record<string, string> = {
-  '命宫':  'Mệnh Cung',
-  '兄弟宫':'Huynh Đệ Cung',
-  '夫妻宫':'Phu Thê Cung',
-  '子女宫':'Tử Nữ Cung',
-  '财帛宫':'Tài Bạch Cung',
-  '疾厄宫':'Tật Ách Cung',
-  '迁移宫':'Thiên Di Cung',
-  '交友宫':'Giao Hữu Cung',
-  '官禄宫':'Quan Lộc Cung',
-  '田宅宫':'Điền Trạch Cung',
-  '福德宫':'Phúc Đức Cung',
-  '父母宫':'Phụ Mẫu Cung',
+  '命宫': 'Mệnh Cung',
+  '兄弟': 'Huynh Đệ Cung',
+  '夫妻': 'Phu Thê Cung',
+  '子女': 'Tử Nữ Cung',
+  '财帛': 'Tài Bạch Cung',
+  '疾厄': 'Tật Ách Cung',
+  '迁移': 'Thiên Di Cung',
+  '仆役': 'Bộc Dịch Cung',
+  '交友': 'Giao Hữu Cung',
+  '官禄': 'Quan Lộc Cung',
+  '田宅': 'Điền Trạch Cung',
+  '福德': 'Phúc Đức Cung',
+  '父母': 'Phụ Mẫu Cung',
 };
 
 export const STAR_NAME_VI: Record<string, string> = {
